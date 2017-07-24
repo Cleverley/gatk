@@ -1,6 +1,9 @@
 package org.broadinstitute.hellbender.utils.codecs.GENCODE;
 
 import htsjdk.tribble.Feature;
+import org.broadinstitute.hellbender.utils.gene.Gene;
+
+import java.util.ArrayList;
 
 /**
  * A GTF Feature represents one row of a GTF File.
@@ -9,21 +12,61 @@ import htsjdk.tribble.Feature;
  *
  * Created by jonn on 7/21/17.
  */
-public class GencodeGtfTranscriptFeature implements Feature {
+final public class GencodeGtfFeature implements Feature {
+
+    // Required base GTF Fields:
+    private String chromosomeName;
+    private AnnotationSource annotationSource;
+    private FeatureType featureType;
+    private int genomicStartLocation;
+    private int genomicEndLocation;
+    private GenomicStrand genomicStrand;
+    private GenomicPhase genomicPhase;
+
+    // Required GENCODE GTF Fields:
+    private String geneId;
+    private String transcriptId;
+    private GeneTranscriptType geneType;
+    private GeneTranscriptStatus geneStatus;
+    private String geneName;
+    private GeneTranscriptType transcriptType;
+    private GeneTranscriptStatus transcriptStatus;
+    private String transcriptName;
+    private int exonNumber;
+    private String exonId;
+    private LocusLevel locusLevel;
+
+    // Optional GENCODE GTF Fields:
+    private FeatureTag gencodeFeatureTag = null;
+    private String ccdsid = null;
+    private String havana_gene = null;
+    private String havana_transcript = null;
+    private String protein_id = null;
+    private String ont = null;
+    private TranscriptSupportLevel transcriptSupportLevel = null;
+    private RemapStatus remapStatus = null;
+    private String remapOriginalId = null;
+    private Long remapOriginalLocation = null;
+    private Long remapNumMappings = null;
+    private RemapTargetStatus remapTargetStatus = null;
+    private String remapSubstitutedMissingTarget = null;
+
+    // Features that are contained in this one:
+    ArrayList<GencodeGtfFeature> subFeatures = null;
 
     @Override
     public String getContig() {
-        return null;
+        return chromosomeName;
     }
 
     @Override
     public int getStart() {
-        return 0;
+        return genomicStartLocation;
     }
 
     @Override
     public int getEnd() {
-        return 0;
+        return genomicEndLocation;
     }
 
     // ================================================================================================
@@ -190,7 +233,16 @@ public class GencodeGtfTranscriptFeature implements Feature {
         PUTATIVE
     }
 
-    public enum Tag {
+    public enum LocusLevel {
+        // Verified locus
+        ONE,
+        // Manually annotated locus
+        TWO,
+        // Automatically annotated locus
+        THREE
+    }
+
+    public enum FeatureTag {
         // 3' end extended based on RNA-seq data.
         three_nested_supported_extension,
 
