@@ -106,7 +106,7 @@ install:
 script:
 # run a basic sanity check to be sure that gatk-launch doesn't explode
 # run tests
-- if [[ $TRAVIS_EVENT_TYPE=cron]]; then
+- if [[ $TRAVIS_EVENT_TYPE == cron]]; then
     echo "Not running any tests for nightly builds";
   elif [[ $TRAVIS_SECURE_ENV_VARS == false && $TEST_TYPE == cloud ]]; then
     echo "Can't run cloud tests without keys so don't run tests";
@@ -157,7 +157,7 @@ after_success:
 after_failure:
 - dmesg | tail -100
 after_script:
-- if [ $TRAVIS_SECURE_ENV_VARS == true ]; then
+- if [ $TRAVIS_SECURE_ENV_VARS == true && $TRAVIS_EVENT_TYPE != cron]; then
     $GCLOUD/gcloud components -q update gsutil;
     REPORT_PATH=$TRAVIS_BRANCH_$TRAVIS_JOB_NUMBER;
     $GCLOUD/gsutil -m cp -z html -z js -z xml -z css -r build/reports/tests gs://hellbender/test/build_reports/$REPORT_PATH/;
