@@ -4,10 +4,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.broadinstitute.hellbender.exceptions.GATKException;
 import org.broadinstitute.hellbender.utils.Utils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Manage a global collection of {@link BwaMemIndex} instances.
@@ -29,12 +26,29 @@ public class BwaMemIndexCache {
         return instances.get(indexImageFile);
     }
 
+    public static synchronized void closeInstance(final String indexImageFile) {
+        if (instances.containsKey(indexImageFile)) {
+            instances.get(indexImageFile).close();
+            instances.remove(indexImageFile);
+        }
+    }
+
+    public static synchronized void closeInstance(final BwaMemIndex instance) {
+        if (instances.values().contains(instance)) {
+            instance.close();
+            instances.values().remove(instance);
+        }
+    }
+
     /**
      * Closes all instances in the VM.
      */
     public static synchronized void closeInstances() {
-        instances.values().forEach(BwaMemIndex::close);
-        instances.clear();
+        final Iterator<BwaMemIndex> it = instances.values().iterator();
+        while (it.hasNext()) {
+            it.next().close();
+            it.remove();
+        }
     }
 
     /**
