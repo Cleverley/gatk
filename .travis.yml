@@ -106,7 +106,7 @@ install:
 script:
 # run a basic sanity check to be sure that gatk-launch doesn't explode
 # run tests
-- if [[TRAVIS_EVENT_TYPE=cron]]; then
+- if [[ $TRAVIS_EVENT_TYPE=cron]]; then
     echo "Not running any tests for nightly builds";
   elif [[ $TRAVIS_SECURE_ENV_VARS == false && $TEST_TYPE == cloud ]]; then
     echo "Can't run cloud tests without keys so don't run tests";
@@ -146,7 +146,7 @@ after_success:
 - if [[ $TRAVIS_BRANCH == master && $UPLOAD == true ]]; then ./gradlew uploadArchives; fi
 # if this is actually a commit to master and not a pull request build into master, then publish master-snapshot
 # This creates and uploads the gatk zip file to the nightly build bucket, only keeping the 10 newest entries
-- if [[ $TRAVIS_BRANCH == je_travisNightlyBuildUpload && $UPLOAD == true && ${travis show master | head -2 | grep 'State:' | awk '{print $NF}']]; then
+- if [[ $TRAVIS_BRANCH == je_travisNightlyBuildUpload && $UPLOAD == true && "$(travis show master | head -2 | grep 'State:' | awk '{print $NF}')" == passed]]; then
     gsutil ls -l gs://gatk-nightlybuild/teststuff | awk '{$1=""}1' | sort -r | awk '{$1=""}1' | awk 'NR>9' | xargs -I {} gsutil rm {};
     ./gradlew bundle
     $GCLOUD/gsutil -m cp build/"$(ls build/ | grep .zip)" gs://gatk-nightlybuild/;
