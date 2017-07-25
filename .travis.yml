@@ -147,9 +147,10 @@ after_success:
 # if this is actually a commit to master and not a pull request build into master, then publish master-snapshot
 # This creates and uploads the gatk zip file to the nightly build bucket, only keeping the 10 newest entries
 - if [[ $TRAVIS_BRANCH == je_travisNightlyBuildUpload && $UPLOAD == true && "$(travis show master | head -2 | grep 'State:' | awk '{print $NF}')" == passed]]; then
-    gsutil ls -l gs://gatk-nightlybuild/teststuff | awk '{$1=""}1' | sort -r | awk '{$1=""}1' | awk 'NR>9' | xargs -I {} gsutil rm {};
+    gsutil ls -l gs://gatk-nightly-builds | awk '{$1=""}1' | sort -r | awk '{$1=""}1' | awk 'NR>9' | xargs -I {} gsutil rm {};
     ./gradlew bundle
-    $GCLOUD/gsutil -m cp build/"$(ls build/ | grep .zip)" gs://gatk-nightlybuild/;
+    mv build/"$(ls build/ | grep .zip)" build/"$(date +%Y-%m-%d)"-"$(ls build/ | grep .zip)"
+    $GCLOUD/gsutil -m cp build/"$(ls build/ | grep .zip)" gs://gatk-nightly-builds/;
 - if [[ $TRAVIS_BRANCH == master && $TRAVIS_PULL_REQUEST == false && $UPLOAD == true ]]; then
     git tag master;
     ./gradlew uploadArchives; 
